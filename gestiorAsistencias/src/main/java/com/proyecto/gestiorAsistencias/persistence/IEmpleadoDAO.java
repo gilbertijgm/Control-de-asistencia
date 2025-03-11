@@ -12,7 +12,9 @@ public interface IEmpleadoDAO {
     //Optional me permite manejar los casos en que los valores sean nulos
     Optional<Empleado> findEmpleadoById(Long id);
 
-    void saveEmpleado(Empleado empleado);
+    Empleado saveEmpleado(Empleado empleado);
+
+    Empleado updateEmpleado(Empleado empleado);
 
     void deleteEmpleadoById(Long id);
 

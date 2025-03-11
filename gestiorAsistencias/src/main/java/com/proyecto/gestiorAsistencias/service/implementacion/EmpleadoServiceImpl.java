@@ -1,5 +1,7 @@
 package com.proyecto.gestiorAsistencias.service.implementacion;
 
+import com.proyecto.gestiorAsistencias.advice.ResourceNotFoundException;
+import com.proyecto.gestiorAsistencias.controllers.dtos.EmpleadoDTO;
 import com.proyecto.gestiorAsistencias.entities.Empleado;
 import com.proyecto.gestiorAsistencias.persistence.IEmpleadoDAO;
 import com.proyecto.gestiorAsistencias.service.IEmpleadoService;
@@ -7,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
 @Service
 public class EmpleadoServiceImpl implements IEmpleadoService {
@@ -16,30 +18,111 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
     private IEmpleadoDAO empleadoDAO;
 
     @Override
-    public List<Empleado> findAllEmpleado() {
-        List<Empleado> listaEmpleados = empleadoDAO.findAllEmpleado();
+    public List<EmpleadoDTO> findAllEmpleado() {
+        List<EmpleadoDTO> listaEmpleados = empleadoDAO.findAllEmpleado().stream()
+                .map(empleado -> EmpleadoDTO.builder()
+                        .idEmpleado(empleado.getIdEmpleado())
+                        .dni(empleado.getDni())
+                        .nombreApellido(empleado.getNombreApellido())
+                        .cargo(empleado.getCargo())
+                        .horasLaboralesDiarias(empleado.getHorasLaboralesDiarias())
+                        .costoPorHora(empleado.getCostoPorHora())
+                        .build())
+                .toList();
 
-        return  listaEmpleados;
+        return listaEmpleados;
     }
 
     @Override
-    public Optional<Empleado> findEmpleadoById(Long id) {
-        return empleadoDAO.findEmpleadoById(id);
+    public EmpleadoDTO findEmpleadoById(Long id) {
+
+        return empleadoDAO.findEmpleadoById(id)
+                .map(empleado -> EmpleadoDTO.builder()
+                        .idEmpleado(empleado.getIdEmpleado())
+                        .dni(empleado.getDni())
+                        .nombreApellido(empleado.getNombreApellido())
+                        .cargo(empleado.getCargo())
+                        .horasLaboralesDiarias(empleado.getHorasLaboralesDiarias())
+                        .costoPorHora(empleado.getCostoPorHora())
+                        .build())
+                .orElseThrow(() -> new ResourceNotFoundException("Empleado no econtrado con el id: " + id));
     }
 
     @Override
-    public Empleado saveEmpleado(Empleado empleado) {
-        empleadoDAO.saveEmpleado(empleado);
-        return empleado;
+    public EmpleadoDTO saveEmpleado(EmpleadoDTO empleadoDto) {
+        //Convierto el DTO que recibo a una entidad
+        Empleado empleado = Empleado.builder()
+                .dni(empleadoDto.getDni())
+                .nombreApellido(empleadoDto.getNombreApellido())
+                .cargo(empleadoDto.getCargo())
+                .horasLaboralesDiarias(empleadoDto.getHorasLaboralesDiarias())
+                .costoPorHora(empleadoDto.getCostoPorHora())
+                .horasTrabajadasPorMes(empleadoDto.getHorasTrabajadasPorMes())
+                .sueldoMensual(empleadoDto.getSueldoMensual())
+                .build();
+
+        //guardo el empleado convertido en la bd
+        empleado = empleadoDAO.saveEmpleado(empleado);
+
+        //para retornar la respuesta, primero debo convertir el empleado guardado de nuevo a un DTO
+        return EmpleadoDTO.builder()
+                .idEmpleado(empleado.getIdEmpleado())
+                .dni(empleado.getDni())
+                .nombreApellido(empleado.getNombreApellido())
+                .cargo(empleado.getCargo())
+                .horasLaboralesDiarias(empleado.getHorasLaboralesDiarias())
+                .costoPorHora(empleado.getCostoPorHora())
+                .build();
     }
+
+    @Override
+    public EmpleadoDTO updateEmpleado(EmpleadoDTO empleadoDto, Long id) {
+        Empleado empleado = empleadoDAO.findEmpleadoById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado con el id: " + id));
+
+        //Actualizamos los campos de la entidad con los atributos del DTO que recibimos
+        empleado.setDni(empleadoDto.getDni());
+        empleado.setNombreApellido(empleadoDto.getNombreApellido());
+        empleado.setCargo(empleadoDto.getCargo());
+        empleado.setHorasLaboralesDiarias(empleadoDto.getHorasLaboralesDiarias());
+        empleado.setCostoPorHora(empleadoDto.getCostoPorHora());
+
+        //Guardamos la entidad actualizada
+        Empleado updateEmpleado = empleadoDAO.saveEmpleado(empleado);
+
+        //convertimos la entidad actualizada a DTO para la respuesta
+        return EmpleadoDTO.builder()
+                .idEmpleado(updateEmpleado.getIdEmpleado())
+                .dni(updateEmpleado.getDni())
+                .nombreApellido(updateEmpleado.getNombreApellido())
+                .cargo(updateEmpleado.getCargo())
+                .horasLaboralesDiarias(updateEmpleado.getHorasLaboralesDiarias())
+                .costoPorHora(updateEmpleado.getCostoPorHora())
+                .build();
+    }
+
 
     @Override
     public void deleteEmpleadoById(Long id) {
-        empleadoDAO.deleteEmpleadoById(id);
+        Empleado empleado = empleadoDAO.findEmpleadoById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado con el id: " + id));
+
+        empleadoDAO.deleteEmpleadoById(empleado.getIdEmpleado());
     }
 
     @Override
-    public Optional<Empleado> findByDni(String dni) {
-        return empleadoDAO.findByDni(dni);
+    public EmpleadoDTO findByDni(String dni) {
+        Empleado empleado = empleadoDAO.findByDni(dni)
+                .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado con el DNI: " + dni));
+
+        //convertimos la enditad a un DTO para la respuesta
+        return EmpleadoDTO.builder()
+                .idEmpleado(empleado.getIdEmpleado())
+                .dni(empleado.getDni())
+                .nombreApellido(empleado.getNombreApellido())
+                .cargo(empleado.getCargo())
+                .horasLaboralesDiarias(empleado.getHorasLaboralesDiarias())
+                .costoPorHora(empleado.getCostoPorHora())
+                .build();
     }
 }

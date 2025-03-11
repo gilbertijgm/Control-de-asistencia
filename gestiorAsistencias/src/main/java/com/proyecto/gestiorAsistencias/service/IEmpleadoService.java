@@ -1,20 +1,21 @@
 package com.proyecto.gestiorAsistencias.service;
 
-import com.proyecto.gestiorAsistencias.entities.Empleado;
+import com.proyecto.gestiorAsistencias.controllers.dtos.EmpleadoDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IEmpleadoService {
 
-    List<Empleado> findAllEmpleado();
+    List<EmpleadoDTO> findAllEmpleado();
 
     //Optional me permite manejar los casos en que los valores sean nulos
-    Optional<Empleado> findEmpleadoById(Long id);
+    EmpleadoDTO findEmpleadoById(Long id);
 
-    Empleado saveEmpleado(Empleado empleado);
+    EmpleadoDTO saveEmpleado(EmpleadoDTO empleadoDto);
+
+    EmpleadoDTO updateEmpleado(EmpleadoDTO empleadoDto, Long id);
 
     void deleteEmpleadoById(Long id);
 
-    Optional<Empleado> findByDni(String dni);
+    EmpleadoDTO findByDni(String dni);
 }

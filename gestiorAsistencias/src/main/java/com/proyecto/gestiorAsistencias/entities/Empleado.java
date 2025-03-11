@@ -1,5 +1,6 @@
 package com.proyecto.gestiorAsistencias.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,20 +36,22 @@ public class Empleado {
     private int horasLaboralesDiarias;
 
     @Column(name = "costo_por_hora")
-    private BigDecimal costoPorHora;
+    private Double costoPorHora;
 
     @Column(name = "horas_trabajadas_mes")
-    private Double horasTrabajadasPorMes;
+    private Double horasTrabajadasPorMes =  0.00;
 
     @Column(name = "sueldo_mensual")
-    private BigDecimal sueldoMensual;
+    private Double sueldoMensual =  0.00;
 
     @OneToMany(mappedBy = "empleado", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Column(name = "registro_asistencias")
+    @JsonIgnore
     private List<Asistencia> registroDeAsistencias = new ArrayList<>();
 
     @OneToMany(mappedBy = "empleado", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Column(name = "registro_pagos")
+    @JsonIgnore
     private List<HistorialPagos> registroDePagos = new ArrayList<>();
 }
 

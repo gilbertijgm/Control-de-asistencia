@@ -29,8 +29,15 @@ public class EmpleadoDAOImpl implements IEmpleadoDAO {
     }
 
     @Override
-    public void saveEmpleado(Empleado empleado) {
-        empleadoRepo.save(empleado);
+    public Empleado saveEmpleado(Empleado empleado) {
+        return empleadoRepo.save(empleado);
+
+    }
+
+    @Override
+    public Empleado updateEmpleado(Empleado empleado) {
+        return empleadoRepo.save(empleado);
+
     }
 
     @Override

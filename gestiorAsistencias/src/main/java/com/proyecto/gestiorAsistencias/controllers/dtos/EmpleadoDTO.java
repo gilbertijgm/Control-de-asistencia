@@ -35,7 +35,11 @@ public class EmpleadoDTO {
     private int horasLaboralesDiarias;
 
     @NotNull(message = "Campo costo por hora es requerido, no puede estar vacio o nulo")
-    private BigDecimal costoPorHora;
+    private Double costoPorHora;
+
+    private Double horasTrabajadasPorMes = 0.00;
+
+    private Double sueldoMensual =  0.00;
 
 //    private Double horasTrabajadasPorMes;
 //
