@@ -2,6 +2,7 @@ package com.proyecto.gestiorAsistencias.controllers.dtos;
 
 
 
+import com.proyecto.gestiorAsistencias.entities.Empleado;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,5 +28,5 @@ public class HistorialPagosDTO {
 
     private LocalDateTime fechaDeGeneracion;
 
-    private EmpleadoDTO empleadoDTO;
+    private Empleado empleado;
 }

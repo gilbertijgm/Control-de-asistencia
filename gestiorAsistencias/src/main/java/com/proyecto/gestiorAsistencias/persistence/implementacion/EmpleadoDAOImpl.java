@@ -4,6 +4,8 @@ import com.proyecto.gestiorAsistencias.entities.Empleado;
 import com.proyecto.gestiorAsistencias.persistence.IEmpleadoDAO;
 import com.proyecto.gestiorAsistencias.repository.EmpleadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,6 +17,13 @@ public class EmpleadoDAOImpl implements IEmpleadoDAO {
 
     @Autowired
     private EmpleadoRepository empleadoRepo;
+
+    @Override
+    public Page<Empleado> findAllEmpleadoPage(Pageable pageable) {
+        Page<Empleado> pageEmpleados = empleadoRepo.findAll(pageable);
+
+        return pageEmpleados;
+    }
 
     @Override
     public List<Empleado> findAllEmpleado() {

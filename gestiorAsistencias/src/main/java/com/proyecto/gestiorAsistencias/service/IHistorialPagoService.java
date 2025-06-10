@@ -3,8 +3,10 @@ package com.proyecto.gestiorAsistencias.service;
 import com.proyecto.gestiorAsistencias.controllers.dtos.HistorialPagosDTO;
 import com.proyecto.gestiorAsistencias.entities.HistorialPagos;
 
+import java.util.List;
+
 public interface IHistorialPagoService {
 
-    HistorialPagos save(HistorialPagosDTO historialPagosDTO);
+    List<HistorialPagosDTO> findAll();
 
 }

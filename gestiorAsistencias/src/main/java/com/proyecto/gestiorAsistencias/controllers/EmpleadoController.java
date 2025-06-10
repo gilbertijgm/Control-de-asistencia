@@ -1,21 +1,24 @@
 package com.proyecto.gestiorAsistencias.controllers;
 
+import com.proyecto.gestiorAsistencias.advice.payload.ApiResponse;
 import com.proyecto.gestiorAsistencias.controllers.dtos.EmpleadoDTO;
-import com.proyecto.gestiorAsistencias.entities.Empleado;
 import com.proyecto.gestiorAsistencias.service.IEmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/empleado")
@@ -25,10 +28,34 @@ public class EmpleadoController {
     private IEmpleadoService empleadoService;
 
     @GetMapping("/findAll")
-    public ResponseEntity<?> findAll(){
+    public ResponseEntity<ApiResponse<Map<String, Object>>> findAll(@RequestParam(defaultValue = "0") int page,
+                                                                  @RequestParam(defaultValue = "5") int size){
 
-        return ResponseEntity.ok(empleadoService.findAllEmpleado());
+        // crear el pageable para la paginacion
+        Pageable pageable = PageRequest.of(page, size);
 
+        // obtener empleados paginados
+        Page<EmpleadoDTO> empleadoPage = empleadoService.findAllEmpleadoPage(pageable);
+
+        // creamos un mapa para almacenar las respuestas personalizadas
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("empleados", empleadoPage.getContent());
+        response.put("totalElements", empleadoPage.getTotalElements()); //Devuelve el total de elementos
+        response.put("totalPages", empleadoPage.getTotalPages()); // obtiene el total de paginas
+        response.put("pageSize", empleadoPage.getSize()); //devuelve el tamaño de la pagina
+
+        //Calculando y obteniendo la pagina anterior
+        response.put("previousPage", empleadoPage.hasPrevious() ? empleadoPage.getNumber() - 1 : null); // si empleadoPage.hasPrevious() es true restamos uno a la pagina actual, si no hay pagina anterior devolvemos null
+
+        response.put("currentPage", empleadoPage.getNumber()); // obtiene el numero actual de la pagina
+
+        //Calculando y obteniendo la pagina siguiente
+       response.put("nextPage", empleadoPage.hasNext() ? empleadoPage.getNumber() + 1 : null); //si empleadoPage.hasNext() es true sumamos uno a la pagina actual, si no hay pagina anterior devolvemos null
+
+        ApiResponse<Map<String, Object>> apiResponse = new ApiResponse<>(200,
+                "Lista de empleados obetenidad correctamente", response);
+
+        return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/findById")
@@ -39,8 +66,10 @@ public class EmpleadoController {
         }
 
         try {
+            EmpleadoDTO empleado = empleadoService.findEmpleadoById(id);
 
-            return ResponseEntity.ok(empleadoService.findEmpleadoById(id));
+            ApiResponse<EmpleadoDTO> response = new ApiResponse<>(201, "Recurso Encontrado", empleado);
+            return ResponseEntity.ok(response);
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID proporcionado no es válido.");
         } catch (NoSuchElementException e) {
@@ -56,7 +85,10 @@ public class EmpleadoController {
         }
 
         try {
-            return ResponseEntity.ok(empleadoService.findByDni(dni));
+            EmpleadoDTO empleado = empleadoService.findByDni(dni);
+
+            ApiResponse<EmpleadoDTO> response = new ApiResponse<>(201, "Recurso Encontrado", empleado);
+            return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) { //excepción en Java que se produce cuando no se encuentra el elemento solicitado
             return ResponseEntity.notFound().build();
         }
@@ -67,7 +99,10 @@ public class EmpleadoController {
 
         EmpleadoDTO savedEmpleado = empleadoService.saveEmpleado(empleadoDTO);
 
-        return ResponseEntity.created(new URI("/api/empleado/save/")).body(savedEmpleado);
+        ApiResponse<EmpleadoDTO> response = new ApiResponse<>(201, "Registrado Correctamente", savedEmpleado);
+
+        return ResponseEntity.created(new URI("/api/empleado/save/")).body(response);
+
     }
 
     @PutMapping("/update")
@@ -78,7 +113,10 @@ public class EmpleadoController {
         }
 
         try {
-            return ResponseEntity.ok(empleadoService.updateEmpleado(empleadoDTO, id));
+            EmpleadoDTO updateEmpleado = empleadoService.updateEmpleado(empleadoDTO, id);
+
+            ApiResponse<EmpleadoDTO> response = new ApiResponse<>(200, "Actualizado Correctamente", updateEmpleado);
+            return ResponseEntity.ok(response);
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID proporcionado no es válido.");
         } catch (NoSuchElementException e) {
@@ -96,7 +134,9 @@ public class EmpleadoController {
 
         try {
             empleadoService.deleteEmpleadoById(id);
-            return ResponseEntity.ok("Registro Eliminado");
+
+            ApiResponse<EmpleadoDTO> response = new ApiResponse<>(200, "Recurso Eliminado", null);
+            return ResponseEntity.ok(response);
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID proporcionado no es válido.");
         } catch (NoSuchElementException e) {

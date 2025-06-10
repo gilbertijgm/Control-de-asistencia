@@ -6,16 +6,37 @@ import com.proyecto.gestiorAsistencias.entities.Empleado;
 import com.proyecto.gestiorAsistencias.persistence.IEmpleadoDAO;
 import com.proyecto.gestiorAsistencias.service.IEmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+
+
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class EmpleadoServiceImpl implements IEmpleadoService {
 
     @Autowired
     private IEmpleadoDAO empleadoDAO;
+
+    @Override
+    public  Page<EmpleadoDTO> findAllEmpleadoPage(Pageable pageable) {
+        // Obtener la lista de empleados paginados desde el repositorio
+        Page<Empleado> empleadosPage = empleadoDAO.findAllEmpleadoPage(pageable);
+
+        // Convertir cada empleado a EmpleadoDTO usando .map()
+        return empleadosPage.map(empleado -> EmpleadoDTO.builder()
+                .idEmpleado(empleado.getIdEmpleado())
+                .dni(empleado.getDni())
+                .nombreApellido(empleado.getNombreApellido())
+                .cargo(empleado.getCargo())
+                .horasLaboralesDiarias(empleado.getHorasLaboralesDiarias())
+                .costoPorHora(empleado.getCostoPorHora())
+                .horasTrabajadasPorMes(empleado.getHorasTrabajadasPorMes())
+                .sueldoMensual(empleado.getSueldoMensual())
+                .build());
+    }
 
     @Override
     public List<EmpleadoDTO> findAllEmpleado() {

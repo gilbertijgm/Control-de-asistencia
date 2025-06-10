@@ -1,10 +1,14 @@
 package com.proyecto.gestiorAsistencias.service;
 
 import com.proyecto.gestiorAsistencias.controllers.dtos.EmpleadoDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface IEmpleadoService {
+
+    Page<EmpleadoDTO> findAllEmpleadoPage(Pageable pageable);
 
     List<EmpleadoDTO> findAllEmpleado();
 
